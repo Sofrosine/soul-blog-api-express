@@ -20,6 +20,14 @@ app.use((req, res, next) => {
 
 app.use('/v1/skill', skillRoutes);
 
+app.use((error, req, res, next) => {
+  const status = error.errorStatus || 500;
+  const message = error.message;
+  const data = error.data;
+
+  res.status(status).json({message: message, data: data});
+});
+
 app.listen(4000, () => {
   console.log(`Server started on 4000`);
 });

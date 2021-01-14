@@ -1,4 +1,5 @@
 const skillModel = require('../models/skills');
+const {validationResult} = require('express-validator');
 
 exports.getSkills = async (req, res, next) => {
   try {
@@ -17,14 +18,33 @@ exports.getSkills = async (req, res, next) => {
 };
 
 exports.createSkill = async (req, res, next) => {
+  const {name, percentage} = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    let err = new Error('Invalid Input Value');
+    err.errorStatus = 400;
+    err.data = errors.array();
+    return next(err);
+  }
+
   try {
     const createSkillResponse = await skillModel.createSkill(req.body);
     res.status(201).json({
       message: 'Skill Created',
-      data: createSkillResponse,
+      data: {
+        id: createSkillResponse.insertId,
+        name,
+        percentage,
+      },
     });
   } catch (error) {
-    console.log('error nichh');
+    if (!name && !percentage) {
+      res.json(400).json({
+        message: 'Terjadi kesalahan input',
+      });
+    }
   }
   next();
 };
